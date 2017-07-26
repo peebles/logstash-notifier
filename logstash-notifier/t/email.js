@@ -29,11 +29,11 @@ app.log = new (winston.Logger)({
     ],
 });
 
-var email = require( '../email' )( app, app.config.smtp );
+var email = require( '../email' )( app, app.config.email );
 
 email.send({
-    to: 'aqpeeb@gmail.com',
-    from: app.config.smtp.from,
+    to: process.argv[2] || 'aqpeeb@gmail.com',
+    from: app.config.email.from,
     subject: 'Test Email',
     text: 'This is a test',
     html: '<pre>This is a test</pre>'

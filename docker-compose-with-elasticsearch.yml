@@ -90,19 +90,8 @@ services:
     container_name: logs
     volumes_from:
       - logsdata
-    environment:
-      PROXY_SQLITEDB: /data/logger.db
-      PROXY_LOGS_LOCATION: /data
-      PROXY_LOGS_MAXSIZE: 104857600
-      PROXY_LOGS_MAXFILES: 3
-      PROXY_WEBSERVER_USER: admin
-      PROXY_WEBSERVER_PASS: password
-      PROXY_SMTP_USER: USER
-      PROXY_SMTP_PASS: PASS
-      PROXY_SMTP_HOST: smtp.sendgrid.net
-      PROXY_SMTP_PORT: 465
-      PROXY_SMTP_AUTH: PLAIN
-      PROXY_SMTP_FROM: alerts@yourco.com
+    env_file:
+      - ./config.env
     logging:
       driver: "json-file"
       options:
