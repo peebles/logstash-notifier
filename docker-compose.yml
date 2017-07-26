@@ -1,0 +1,74 @@
+version: "2"
+
+services:
+
+  logstash:
+    image: logstash
+    container_name: logstash
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    command: |
+      -e '
+      input {
+        tcp {
+          port => 3030
+          type => meta
+          add_field => { "protocol" => "tcp" }
+          codec => json
+        }
+        udp {
+          port => 3030
+          type => meta
+          add_field => { "protocol" => "udp" }
+          codec => json
+        }
+      }
+      output {
+        tcp {
+          codec => json_lines
+          host => "logs"
+          port => 3000
+          mode => "client"
+        }
+      }'
+    ports:
+      - "3030:3030/udp"
+      - "3030:3030"
+
+  logsdata:
+    image: busybox
+    container_name: logsdata
+    volumes:
+      - /data
+    command:
+      /bin/true
+
+  logs:
+    build: logstash-notifier
+    container_name: logs
+    volumes_from:
+      - logsdata
+    environment:
+      PROXY_SQLITEDB: /data/logger.db
+      PROXY_LOGS_LOCATION: /data
+      PROXY_LOGS_MAXSIZE: 104857600
+      PROXY_LOGS_MAXFILES: 3
+      PROXY_WEBSERVER_USER: admin
+      PROXY_WEBSERVER_PASS: password
+      PROXY_SMTP_USER: USER
+      PROXY_SMTP_PASS: PASS
+      PROXY_SMTP_HOST: smtp.sendgrid.net
+      PROXY_SMTP_PORT: 465
+      PROXY_SMTP_AUTH: PLAIN
+      PROXY_SMTP_FROM: alerts@events.com
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    ports:
+      - "8080:8080"
+
