@@ -1,0 +1,75 @@
+version: "2"
+
+services:
+
+  logstash:
+    image: logstash
+    container_name: logstash
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    command: |
+      -e '
+      input {
+        tcp {
+          port => 3030
+          type => meta
+          add_field => { "protocol" => "tcp" }
+          codec => json
+        }
+        udp {
+          port => 3030
+          type => meta
+          add_field => { "protocol" => "udp" }
+          codec => json
+        }
+      }
+      output {
+        tcp {
+          codec => json_lines
+          host => "logs"
+          port => 3000
+          mode => "client"
+        }
+      }'
+    ports:
+      - "3030:3030/udp"
+      - "3030:3030"
+
+  logsdata:
+    image: busybox
+    container_name: logsdata
+    volumes:
+      - /data
+    command:
+      /bin/true
+
+  logs:
+    build: logstash-notifier
+    container_name: logs
+    volumes_from:
+      - logsdata
+    env_file:
+      - ./config.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    ports:
+      - "8080:8080"
+
+  backups:
+    build: docker-backup-to-s3
+    container_name: backups
+    volumes_from:
+      - logsdata
+    env_file:
+      - ./backups.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"

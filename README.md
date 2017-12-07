@@ -55,3 +55,8 @@ application that is writing logs to logstash.
 
 The log files are chopped and compressed by `winston`.
 
+## Backups
+
+You can add a backup function to your stack, so that the logs are backed up on a periodic basis to S3.  See `docker-compose-with-backups.yml`
+and `backups.env` and read `docker-backup-to-s3/README.md` for details.
+
