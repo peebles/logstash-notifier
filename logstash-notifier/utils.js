@@ -7,12 +7,13 @@ let async = require( 'async' );
 let byline = require( 'byline' );
 let writer = require( './lib/writer' );
 let net = require( 'net' );
+let _ = require( 'lodash' );
 
 function setupProxyServers( app, messageQueue, cb ) {
   writer.initialize( app.config.logs );
 
   function parse( msg ) {
-    let json = msg;
+    let json = _.cloneDeep( msg );
     json.timestamp = json[ '@timestamp' ] || new Date().toString();
     json.message = '[' + (json.level || json.severity) + '] ' + json.message +
 		    (( json.meta && typeof json.meta == 'object' && Object.keys(json.meta).length ) ? ' ' + JSON.stringify(json.meta) : '' );
