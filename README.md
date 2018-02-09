@@ -60,3 +60,19 @@ The log files are chopped and compressed by `winston`.
 You can add a backup function to your stack, so that the logs are backed up on a periodic basis to S3.  See `docker-compose-with-backups.yml`
 and `backups.env` and read `docker-backup-to-s3/README.md` for details.
 
+## Testing
+
+Find the IP address of the docker machine you launch the stack on.  Then try:
+
+```bash
+echo '{"timestamp":"2017-07-25T16:42:08.922Z","level":"debug","meta":{"foo":"bar"},"host":"fc1772754b09","program":"app","message":"This message has meta:"}' | nc YOUR-IP-ADDRESS 3030 
+```
+
+That command line is sending a JSON formatted string over TCP to YOUR-IP-ADDRESS:3030.  You can then log into the `logs` container and look at "all.log":
+
+```bash
+$ docker exec -it logs cat all.log
+```
+
+You can also log into the Kibana UX.  Aim your browser at http://YOUR-IP-ADDRESS/.  On the initial screen you will be asked for a "Time Filter field name".  Choose "@timestamp"
+from the pull down, and then click the `create` button.  Then on the left menu, go to "Discover" and you should see your log data.
